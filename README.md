@@ -1,29 +1,33 @@
-What is Routing and Why do We Do it?
-Written for PHP 7
+This is a router that forms part of a personal framework called Legacy.
 
-A router maps a web URL to particular codepaths in your codebase. In legacy web development a typical directory structure is 
+The goal is to make is possible to progressively refactor a legacy code project in to MVC
+while also developing new features.
 
-images/
-javascript/
-library/
-userpage.php
-login.php
-gallery.php
+All of the legacy code can be placed inside of a directory called legacy and using this
+router, the either the code in the legacy folder is run or the more modern code is run. 
+This is determined by setting routes to map urls to modern code and by specifying if the
+legacy file should be used if both newer code and and legacy code exist.
+ 
+```php    
+    $configuration = [
+     'routes' => [
+         '/user/update.php' => ['controller' => '/user/', 'action' => 'update', 'ignore' => true],
+         '/user/delete.php' => ['controller' => '/user/', 'action' => 'delete', 'ignore' => true],
+         '/user/view.php' => ['controller' => '/user/', 'action' => 'view', 'ignore' => true],
+         '/user/' => ['controller' => '/user/', 'action' => 'index', 'ignore' => true]
+     ],
 
-A page like login.php would contain authentication code and presentation code.
-A problem of working this way is that if at any time we need to log in from another page we have to either duplicate the code from login.php. 
-
-Thinking more intelligently about our code, we move the authentication code for the login page out of login.php to somewhere in the library/ folder. The login.php now only really contains presentation code.
-
-This pattern is everywhere. The removal of logic from these \*.php end points results in a file that is mostly presentational data.
-
-[
-
- ????????????????????
-REST...
-
-]
-
-The problem at hand is mapping which code is run and which presentations are called with which URL.
-
-
+     'appUrl' => 'localhost/',
+     'appRootPath' => __DIR__ . '/../',
+     'legacyAppPath' => __DIR__ . '/../Fixtures/',
+    ];
+    
+    //create new router
+    
+    $router = new Routey($configuration);
+    
+    //route, returns an array of the class and method to call
+    $router->route('/auth/login');
+    
+    $router->route('/auth/login', true);//route ignore legacy file
+```

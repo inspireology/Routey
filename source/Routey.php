@@ -1,7 +1,6 @@
 <?php
 
 namespace Routey;
-
 use Exception;
 
 class Routey extends BaseObject
@@ -12,34 +11,30 @@ class Routey extends BaseObject
     private $routes         = [];
 
     /**
-     * @var array
-     */
-    private $appURL         = [];
-
-    /**
-     * @var array
-     */
-    private $namedRoutes    = [];
-
-    /**
-     * @var string The base URL of the App with a trailing forward slash ie: http://www.google.com/
+     * @var string The base URL of the App without a trailing forward slash ie: http://www.google.com
      */
     private $appUrl         = '';
 
     /**
-     * @var string The Path of the application on the server
+     * @var string The Path of the application directory on the server
      */
-    private $appPath        = '';
+    private $appRootPath        = '';
 
-    public function  __construct($routes, $configuration)
+    /**
+     * @var string The Path of the application directory on the server
+     */
+    private $legacyAppPath        = '';
+
+    public function  __construct($configuration)
     {
-        if($this->validateRoutes($routes)) {
-            $this->setRoutes($routes);
+        if($this->validateRoutes($configuration['routes'])) {
+            $this->setRoutes($configuration['routes']);
+
         } else {
             throw new Exception('Invalid routes specified');
         }
 
-
+        $this->setLegacyAppPath($configuration['legacyAppUrl']);
     }
 
     public function __destruct()
@@ -48,48 +43,74 @@ class Routey extends BaseObject
 
     private function matchRequestToRoute($url)
     {
-        //iterate over each route
-            //check if matches with stripos and the route
-            //if it matches return target, params and name to
+        foreach($this->routes as $key => $route) {
+            if(preg_match(":^".$url.":",$key)){ //match route to key
+               return $route;
+            }
+        }
+
         return null;
     }
 
-    private function matchServerRequest()
+    public function matchServerRequest()
     {
         return $this->matchRequestToRoute($_SERVER['REQUEST_URI']);
     }
 
-    private function checkForLegacyEndPoint($path)
+    /**
+     * @param $request
+     * @return bool true if the path is a legacy end point or false
+     */
+    private function checkForLegacyEndPoint($request)
     {
-       return file_exists($path) ? true : false;
+        $path = $this->getLegacyAppPath() ."/". $request;
+        return file_exists($path) ? true : false;
     }
 
-    private function buildRoute()
+    /**
+     * Get the Route from a url
+     *
+     * supplying a url will return the first matched route if any exists in the list of routes. If nothing is found null
+     * will be returned.
+     *
+     * @param $url string The url route to
+     * @param null $ignoreLegacyEndpoint true and false behave as expected. Null causes $route['ignore'] to be used.
+     * @return mixed|null
+     */
+    public function routeToUrl($url, $ignoreLegacyEndpoint = null)
     {
+        $route = $this->matchRequestToRoute($url);
 
+        $returnRoute = null;
+
+        if($route) {
+            $legacyFileExists = $this->checkForLegacyEndPoint($url);
+
+            if($legacyFileExists) {
+
+                $legacyRoute = $route;
+                $legacyRoute['controller'] = $url;
+                $legacyRoute['action'] = '';
+
+                //if the caller specifies to ignore the legacy endpoint do so or else do what is in the route
+                if($ignoreLegacyEndpoint === null) { //not set by caller
+                    $returnRoute = $route['ignore'] ? $route : $legacyRoute;
+
+                } else if ($ignoreLegacyEndpoint == true){
+                    $returnRoute = $route;
+
+                } else if ($ignoreLegacyEndpoint == false){
+                    $returnRoute = $legacyRoute;
+                }
+
+            } else {
+               $returnRoute = $route;
+            }
+
+        }
+        return $returnRoute;
     }
 
-    public function executeRoute()
-    {
-        $route = $this->getRoute();
-
-        //TODO: call route
-
-        //if file exists
-            //if prefer legacy
-            //else prefer modern
-        //else
-            //throw exception no action or controller found
-    }
-
-    public function getRoute()
-    {
-        $class      = '';
-        $method     = '';
-        $parameters = '';
-
-        return [$class, $method, $parameters];
-    }
 
     private function validateRoutes($routes)
     {
@@ -97,18 +118,37 @@ class Routey extends BaseObject
         return true;
     }
 
-    /*
-    protected function addRoute($newRoute)
+    /*******************************************GETTERS & SETTERS******************************************************/
+
+    public function setRoutes($routes)
     {
-        $routes = $this->getRoutes();
-        array_push($routes, $newRoute);//Append Route
-        $this->setRoutes($routes);
+        if($this->validateRoutes($routes)) $this->routes = $routes;
+        else throw new Exception('Unable to set Routes. Invalid Routes array');
     }
 
-    protected function removeRoute($route)
+    public function getRoutes()
     {
-        //TODO implement remove Route
+        return $this->routes;
     }
-    */
 
+    public function getRoute()
+    {
+
+        throw new Exception('implement route');
+    }
+
+    public function getLegacyAppPath()
+    {
+        return $this->legacyAppPath;
+    }
+
+    public function setLegacyAppPath($path)
+    {
+        $this->legacyAppPath = $path;
+    }
+
+    public function getLegacyAppUrl()
+    {
+        return $this->legacyAppUrl;
+    }
 }

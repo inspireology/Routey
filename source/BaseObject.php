@@ -1,4 +1,7 @@
 <?php
+namespace Routey;
+
+use Exception;
 
 abstract class BaseObject
 {
