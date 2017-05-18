@@ -29,5 +29,8 @@ legacy file should be used if both newer code and and legacy code exist.
     //route, returns an array of the class and method to call
     $router->route('/auth/login');
     
-    $router->route('/auth/login', true);//route ignore legacy file
+    //route ignore legacy file
+    $router->route('/auth/login', true);
 ```
+
+

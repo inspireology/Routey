@@ -60,19 +60,4 @@ class RouteyTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(null, $route['controller'], "Routed to Valid Controller when expecting null");
     }
 
-    public function testRouteToLegacyAllowOverride()
-    {
-        $router = new Routey($this->configuration, true);
-        $route = $router->routeToUrl('/user/update.php', true);
-
-        $this->assertEquals(null, $route, "Invalid URLs return null route");
-    }
-
-    public function testRouteToLegacyPreventOverride()
-    {
-        $router = new Routey($this->configuration);
-        $route = $router->routeToUrl('/user/update.php', false);//
-
-        $this->assertEquals(null, $route, "Invalid URLs return null route");
-    }
 }
