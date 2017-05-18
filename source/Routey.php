@@ -6,7 +6,7 @@ use Exception;
 class Routey extends BaseObject
 {
     /**
-     * @var array
+     * @var array an array of routes
      */
     private $routes         = [];
 
@@ -41,6 +41,14 @@ class Routey extends BaseObject
     {
     }
 
+    /**
+     * Match URL to a route and return a route
+     *
+     * Matches the URL to the first match in the list of routes. Will return null on no match
+     *
+     * @param $url
+     * @return mixed|null
+     */
     private function matchRequestToRoute($url)
     {
         foreach($this->routes as $key => $route) {
@@ -52,6 +60,10 @@ class Routey extends BaseObject
         return null;
     }
 
+    /**
+     * Convenience function to match $_SERVER['REQUEST_URI']
+     * @return mixed|null
+     */
     public function matchServerRequest()
     {
         return $this->matchRequestToRoute($_SERVER['REQUEST_URI']);
