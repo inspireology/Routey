@@ -2,7 +2,7 @@
 
 namespace RouteyTest\Test;
 use PHPUnit_Framework_TestCase;
-use Routey\Routey;
+use UnLegacy\Router\Routey;
 
 class RouteyTest extends PHPUnit_Framework_TestCase
 {

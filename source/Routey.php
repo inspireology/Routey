@@ -1,7 +1,8 @@
 <?php
+namespace UnLegacy\Router;
 
-namespace Routey;
 use Exception;
+use UnLegacy\Foundation\BaseObject;
 
 class Routey extends BaseObject
 {

@@ -1,5 +1,5 @@
 <?php
-namespace Routey;
+namespace UnLegacy\Foundation;
 
 use Exception;
 
